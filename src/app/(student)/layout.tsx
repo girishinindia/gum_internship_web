@@ -18,6 +18,7 @@ const STUDENT_NAV: NavItem[] = [
   { href: '/notifications', label: 'Notifications', icon: '🔔' },
   { href: '/orders', label: 'Orders & invoices', icon: '🧾' },
   { href: '/my/portfolio', label: 'Portfolio & resume', icon: '🎯' },
+  { href: '/my/privacy', label: 'Privacy & data', icon: '🔒' },
 ];
 
 /** Student app shell — desktop: top nav + section sidebar; mobile: bottom tabs. */
