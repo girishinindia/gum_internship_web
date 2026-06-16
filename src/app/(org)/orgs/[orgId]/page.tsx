@@ -49,6 +49,7 @@ export default function OrgTeamPage(): JSX.Element {
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-h1">Team</h1>
         <div className="flex gap-2">
+          <Link href={`/orgs/${oid}/branding`} className="btn-outline !h-9 px-3 text-body-sm">🎨 Branding</Link>
           <Button size="sm" variant="outline" onClick={() => setModal('member')}>Add member</Button>
           <Button size="sm" variant="outline" onClick={() => setModal('seats')}>Buy seats</Button>
           <Button size="sm" onClick={() => setModal('assign')} disabled={team.seatsRemaining <= 0}>Assign seat</Button>
