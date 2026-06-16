@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BottomSheet } from './MobileUI';
 import { inr } from '@/lib/format';
@@ -24,6 +24,15 @@ export function MobileDetailClient({ slug, internshipId, pricingType, totalWithG
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [batchId, setBatchId] = useState<number | null>(batches[0]?.id ?? null);
+  const [enrolledId, setEnrolledId] = useState<number | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void api<{ enrollmentId: number; status: string } | null>(`/enrollments/mine/by-internship/${internshipId}`)
+      .then(({ data }) => { if (alive && data && (data.status === 'active' || data.status === 'completed')) setEnrolledId(data.enrollmentId); })
+      .catch(() => undefined); // anonymous → 401 → treat as not enrolled
+    return () => { alive = false; };
+  }, [internshipId]);
 
   const enrollFree = async (): Promise<void> => {
     setBusy(true); setError(null);
@@ -45,16 +54,25 @@ export function MobileDetailClient({ slug, internshipId, pricingType, totalWithG
   return (
     <>
       <div className="z-20 shrink-0 border-t border-neutral-200 bg-white p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            {pricingType === 'free'
-              ? <p className="font-heading text-h3 text-success-700">FREE</p>
-              : <p className="font-heading text-h3">{inr(totalWithGst)}<span className="ml-1 text-caption font-normal text-neutral-500">incl. {gstRate}% GST</span></p>}
+        {enrolledId ? (
+          <div className="flex items-center gap-3">
+            <div className="flex-1"><p className="font-medium text-success-700">✓ You’re already enrolled</p></div>
+            <button onClick={() => router.push(`/m/classroom/${enrolledId}`)} className="h-12 rounded-lg bg-primary-600 px-6 font-medium text-white active:bg-primary-700">
+              Go to classroom
+            </button>
           </div>
-          <button onClick={() => setOpen(true)} className="h-12 rounded-lg bg-primary-600 px-6 font-medium text-white active:bg-primary-700">
-            {pricingType === 'free' ? 'Enroll free' : 'Enroll now'}
-          </button>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              {pricingType === 'free'
+                ? <p className="font-heading text-h3 text-success-700">FREE</p>
+                : <p className="font-heading text-h3">{inr(totalWithGst)}<span className="ml-1 text-caption font-normal text-neutral-500">incl. {gstRate}% GST</span></p>}
+            </div>
+            <button onClick={() => setOpen(true)} className="h-12 rounded-lg bg-primary-600 px-6 font-medium text-white active:bg-primary-700">
+              {pricingType === 'free' ? 'Enroll free' : 'Enroll now'}
+            </button>
+          </div>
+        )}
       </div>
 
       <BottomSheet open={open} onClose={() => setOpen(false)} title={pricingType === 'free' ? 'Choose a cohort' : 'Secure checkout'}>

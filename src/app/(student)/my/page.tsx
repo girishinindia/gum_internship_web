@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { apiGet } from '@/lib/serverApi';
 import { getSessionUser } from '@/lib/session';
 import { inr } from '@/lib/format';
+import { OfferLetterButton } from '@/components/features/OfferLetterButton';
 
 export const metadata = { title: 'Dashboard | GI Internship' };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,7 +97,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
                   </div>
                   <div className="mt-3 flex gap-2">
                     <Link href={`/classroom/${e.id}`} className="btn-primary !h-10 flex-1 text-body-sm">Continue learning</Link>
-                    {e.offerLetterNo && <span className="badge self-center bg-warning-50 text-warning-700">Offer ✓</span>}
+                    {e.offerLetterNo && <OfferLetterButton enrollmentId={e.id} className="badge self-center bg-warning-50 text-warning-700 hover:bg-warning-100 disabled:opacity-60">📄 Offer letter</OfferLetterButton>}
                   </div>
                 </div>
               );

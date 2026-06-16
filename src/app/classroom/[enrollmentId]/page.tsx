@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { ApiError } from '@/lib/types';
 import { Button, Spinner } from '@/components/ui';
+import { OfferLetterButton } from '@/components/features/OfferLetterButton';
 import { useToast } from '@/components/ui/Toast';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,9 +131,10 @@ export default function ClassroomPage(): JSX.Element {
 
           <div className="card p-4">
             <p className="text-body-sm font-semibold text-neutral-700">More</p>
-            <div className="mt-2 flex flex-col gap-1.5 text-body-sm">
+            <div className="mt-2 flex flex-col items-start gap-1.5 text-body-sm">
               <Link href={`/classroom/${eid}/projects`} className="text-primary-700 hover:underline">📋 Project tasks</Link>
               <Link href={`/classroom/${eid}/ai`} className="text-primary-700 hover:underline">🤖 AI study buddy</Link>
+              <OfferLetterButton enrollmentId={eid} className="text-left text-primary-700 hover:underline disabled:text-neutral-400">📄 Offer letter</OfferLetterButton>
               <Link href={`/classroom/${eid}/certificate`} className="text-primary-700 hover:underline">🎓 Certificate</Link>
             </div>
           </div>

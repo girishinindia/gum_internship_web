@@ -8,6 +8,7 @@ import { BottomSheet, Skeleton } from '@/components/MobileUI';
 import { AppBar } from '@/components/mobile/AppBar';
 import { Icon } from '@/components/mobile/Icon';
 import type { IconName } from '@/components/mobile/Icon';
+import { OfferLetterButton } from '@/components/features/OfferLetterButton';
 import { useToast } from '@/components/ui/Toast';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -103,9 +104,10 @@ export default function MobileClassroom(): JSX.Element {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <Link href={`/classroom/${eid}/projects`} className="flex flex-col items-center gap-1 rounded-2xl border border-neutral-200 bg-white py-3 text-caption text-neutral-700"><Icon name="receipt" size={20} /> Projects</Link>
           <Link href={`/classroom/${eid}/ai`} className="flex flex-col items-center gap-1 rounded-2xl border border-neutral-200 bg-white py-3 text-caption text-neutral-700"><Icon name="robot" size={20} /> AI buddy</Link>
+          <OfferLetterButton enrollmentId={eid} className="flex flex-col items-center gap-1 rounded-2xl border border-neutral-200 bg-white py-3 text-caption text-neutral-700 disabled:opacity-60"><Icon name="receipt" size={20} /> Offer letter</OfferLetterButton>
           <Link href={`/classroom/${eid}/certificate`} className="flex flex-col items-center gap-1 rounded-2xl border border-neutral-200 bg-white py-3 text-caption text-neutral-700"><Icon name="school" size={20} /> Certificate</Link>
         </div>
       </div>
