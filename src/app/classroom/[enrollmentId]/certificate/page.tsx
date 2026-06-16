@@ -82,6 +82,9 @@ export default function CertificatePage(): JSX.Element {
                 {cert.linkedinAddUrl && (
                   <a href={cert.linkedinAddUrl} target="_blank" rel="noopener" className="inline-flex h-10 items-center rounded-xl bg-[#0a66c2] px-4 text-body-sm font-medium text-white hover:opacity-90">Add to LinkedIn</a>
                 )}
+                {cert.openBadgeUrl && (
+                  <a href={cert.openBadgeUrl} target="_blank" rel="noopener" className="inline-flex h-10 items-center rounded-xl border border-neutral-200 px-4 text-body-sm font-medium text-primary-700 hover:bg-neutral-50">Open Badge</a>
+                )}
               </div>
             </div>
           </div>
