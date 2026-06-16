@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-neutral-50 font-body text-body text-neutral-900 antialiased; }
+  h1, h2, h3, h4 { @apply font-heading; }
+  ::selection { @apply bg-primary-100 text-primary-900; }
+  /* subtle, modern scrollbar */
+  * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+  /* Indic scripts: taller line-height, never italic */
+  :lang(hi), :lang(gu) { line-height: 1.8; font-style: normal; }
+}
+
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-container px-4 md:px-6 xl:px-8; }
+
+  /* Buttons — gradient primary with lift, refined outline */
+  .btn-primary {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-gradient px-6 font-medium text-white
+           shadow-glow transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0
+           disabled:translate-y-0 disabled:bg-none disabled:bg-neutral-200 disabled:text-neutral-400 disabled:shadow-none;
+  }
+  .btn-outline {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white/80 px-6
+           font-medium text-primary-700 backdrop-blur transition-all duration-200 hover:-translate-y-0.5
+           hover:border-primary-200 hover:bg-white hover:shadow-soft;
+  }
+
+  /* Cards — soft, rounded, hover lift */
+  .card { @apply rounded-2xl border border-neutral-200/80 bg-white shadow-soft; }
+  .card-hover { @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lift hover:border-primary-200; }
+
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-1 text-caption; }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-body-sm
+           font-medium text-neutral-600 transition-all hover:border-primary-300 hover:text-primary-700;
+  }
+  .chip-active { @apply border-transparent bg-brand-gradient text-white shadow-glow hover:text-white; }
+
+  .input {
+    @apply h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-body outline-none transition
+           placeholder:text-neutral-400 focus:border-primary-400 focus:ring-4 focus:ring-primary-100;
+  }
+
+  /* Glassy sticky chrome */
+  .glass { @apply border-b border-neutral-200/70 bg-white/80 backdrop-blur-xl; }
+
+  /* Hero gradient surface + soft brand blobs */
+  .hero-surface { @apply relative overflow-hidden bg-gradient-to-b from-primary-50 via-white to-white; }
+
+  .eyebrow { @apply inline-flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-3 py-1 text-caption font-semibold uppercase tracking-wider text-primary-700; }
+  .gradient-text { @apply bg-brand-gradient bg-clip-text text-transparent; }
+}
+
+/* ---- Mobile-device layout (served to phones/tablets via UA redirect to /m) ---- */
+@layer components {
+  .app-screen { @apply flex min-h-[100dvh] flex-col bg-neutral-50; }
+  .app-bar { @apply sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 glass px-4; }
+  .app-body { @apply flex-1 overflow-y-auto overscroll-contain; -webkit-overflow-scrolling: touch; }
+  .list-row { @apply flex w-full items-center gap-3 bg-white px-4 py-3.5 text-left active:bg-neutral-100; }
+  .pill { @apply inline-flex items-center rounded-full px-3 py-1 text-caption; }
+  .sheet-grabber { @apply mx-auto mt-2 h-1 w-10 rounded-full bg-neutral-300; }
+  .tab-btn { @apply flex flex-1 flex-col items-center justify-center gap-0.5 py-1.5 text-[11px] font-medium; }
+  .screen-enter { animation: slideUp .26s cubic-bezier(0.2,0,0,1); }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+@layer utilities {
+  .blob { filter: blur(64px); opacity: .5; }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .animate-floaty { animation: floaty 7s ease-in-out infinite; }
+}
+
+/* Respect users who prefer reduced motion: drop enter/idle animations */
+@media (prefers-reduced-motion: reduce) {
+  .screen-enter { animation: none; }
+  .animate-floaty { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
