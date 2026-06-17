@@ -72,16 +72,26 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
 
   // 2) Refresh the access token if it expired but we still have a refresh token.
   let rotated: { at: string; rt: string; maxAge: number } | null = null;
+  let sessionDead = false;
   const hasAt = req.cookies.has(AT);
   const rt = req.cookies.get(RT)?.value;
-  if (!hasAt && rt) rotated = await refresh(rt);
-  const loggedIn = req.cookies.has(RT);
+  if (!hasAt && rt) {
+    rotated = await refresh(rt);
+    if (!rotated) sessionDead = true; // refresh cookie present but rejected → dead session
+  }
+  const loggedIn = req.cookies.has(RT) && !sessionDead;
+
+  // A dead session must not look logged-in: clear its cookies on whatever we return.
+  const clearDead = (res: NextResponse): NextResponse => {
+    if (sessionDead) { res.cookies.delete(AT); res.cookies.delete(RT); }
+    return res;
+  };
 
   // 3) Auth gate.
   if (PROTECTED.some((re) => re.test(pathname)) && !loggedIn) {
     const login = new URL('/login', req.url);
     login.searchParams.set('next', pathname);
-    return NextResponse.redirect(login);
+    return clearDead(NextResponse.redirect(login));
   }
   if (pathname === '/login' && loggedIn) {
     return NextResponse.redirect(new URL(isMobile ? '/m/learn' : '/my', req.url));
@@ -98,7 +108,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
     res.cookies.set(RT, rotated.rt, { ...base, maxAge: 30 * 24 * 3600 });
     return res;
   }
-  return NextResponse.next();
+  return clearDead(NextResponse.next());
 }
 
 // Run on everything except API routes, Next internals and static assets.
