@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/Toast';
 
 function LoginForm(): JSX.Element {
   const router = useRouter();
-  const next = useSearchParams().get('next') ?? '/my';
+  const explicitNext = useSearchParams().get('next');
   const toast = useToast();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +35,16 @@ function LoginForm(): JSX.Element {
       return;
     }
     toast('success', 'Welcome back!');
-    router.push(next);
+    // No explicit destination → send instructors to their dashboard, others to /my.
+    let dest = explicitNext ?? '/my';
+    if (!explicitNext) {
+      try {
+        const m = document.cookie.match(/(?:^|;\s*)gum_user=([^;]+)/);
+        const roles = m ? ((JSON.parse(decodeURIComponent(m[1])) as { roles?: string[] }).roles ?? []) : [];
+        if (roles.includes('instructor') || roles.includes('super_admin')) dest = '/instructor';
+      } catch { /* fall back to /my */ }
+    }
+    router.push(dest);
     router.refresh();
   };
 
