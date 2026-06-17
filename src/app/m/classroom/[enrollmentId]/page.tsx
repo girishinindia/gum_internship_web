@@ -9,6 +9,7 @@ import { AppBar } from '@/components/mobile/AppBar';
 import { Icon } from '@/components/mobile/Icon';
 import type { IconName } from '@/components/mobile/Icon';
 import { OfferLetterButton } from '@/components/features/OfferLetterButton';
+import { VideoPlayer } from '@/components/features/VideoPlayer';
 import { useToast } from '@/components/ui/Toast';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,7 +23,6 @@ export default function MobileClassroom(): JSX.Element {
   const [data, setData] = useState<Any | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [active, setActive] = useState<Any | null>(null);
-  const [play, setPlay] = useState<{ embedUrl?: string; loading: boolean; error?: string }>({ loading: false });
   const [live, setLive] = useState<Any[]>([]);
   const [marking, setMarking] = useState(false);
   const [docBusy, setDocBusy] = useState(false);
@@ -42,13 +42,13 @@ export default function MobileClassroom(): JSX.Element {
     }
   }, [data, active]);
 
-  useEffect(() => {
-    if (!active || active.type !== 'video' || active.locked) { setPlay({ loading: false }); return; }
-    setPlay({ loading: true });
-    void api<Any>(`/lessons/${active.id}/play?enrollmentId=${eid}`)
-      .then(({ data: p }) => setPlay({ loading: false, embedUrl: p.embedUrl }))
-      .catch((e) => setPlay({ loading: false, error: e instanceof ApiError ? e.message : 'Playback unavailable.' }));
-  }, [active, eid]);
+  // Auto-complete once the player reports ≥90% watched.
+  const autoComplete = (): void => {
+    if (!active || active.completed) return;
+    void api(`/lessons/${active.id}/progress`, { method: 'POST', body: JSON.stringify({ enrollmentId: eid, completed: true }) })
+      .then(() => { toast('success', 'Auto-completed — 90% watched.'); setActive((a: Any) => (a ? { ...a, completed: true } : a)); return load(); })
+      .catch(() => undefined);
+  };
 
   const openDocument = async (): Promise<void> => {
     if (!active) return;
@@ -106,10 +106,9 @@ export default function MobileClassroom(): JSX.Element {
             <h1 className="text-h3 font-heading">{active.title}</h1>
             <div className="mt-3">
               {active.type === 'video' && (
-                play.loading ? <div className="grid aspect-video place-items-center rounded-2xl bg-neutral-100"><Icon name="play" className="text-neutral-400" /></div>
-                : play.error ? <p className="rounded-2xl bg-danger-50 p-4 text-body-sm text-danger-700">{play.error}</p>
-                : play.embedUrl ? <div className="aspect-video overflow-hidden rounded-2xl bg-black"><iframe src={play.embedUrl} className="h-full w-full" allow="autoplay; fullscreen" allowFullScreen title={active.title} /></div>
-                : <p className="text-neutral-500">No video uploaded yet.</p>
+                active.locked
+                  ? <p className="rounded-2xl bg-neutral-100 p-4 text-body-sm text-neutral-500">Complete earlier lessons to unlock this video.</p>
+                  : <VideoPlayer key={active.id} lessonId={active.id} enrollmentId={eid} title={active.title} onComplete={autoComplete} />
               )}
               {active.type === 'quiz' && active.quizId && <Link href={`/classroom/${eid}/quiz/${active.quizId}`} className="block rounded-2xl bg-primary-600 py-3 text-center font-medium text-white">Start quiz</Link>}
               {active.type === 'live' && <p className="text-neutral-600">Join live sessions from the banner above.</p>}

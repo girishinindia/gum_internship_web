@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { ApiError } from '@/lib/types';
 import { Button, Spinner } from '@/components/ui';
+import { VideoPlayer } from '@/components/features/VideoPlayer';
 import { OfferLetterButton } from '@/components/features/OfferLetterButton';
 import { useToast } from '@/components/ui/Toast';
 
@@ -21,7 +22,6 @@ export default function ClassroomPage(): JSX.Element {
   const [data, setData] = useState<Any | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [active, setActive] = useState<Any | null>(null);
-  const [play, setPlay] = useState<{ embedUrl?: string; loading: boolean; error?: string }>({ loading: false });
   const [live, setLive] = useState<Any[]>([]);
   const [marking, setMarking] = useState(false);
   const [docBusy, setDocBusy] = useState(false);
@@ -49,14 +49,13 @@ export default function ClassroomPage(): JSX.Element {
     }
   }, [data, active]);
 
-  // load video playback when a video lesson is selected
-  useEffect(() => {
-    if (!active || active.type !== 'video' || active.locked) { setPlay({ loading: false }); return; }
-    setPlay({ loading: true });
-    void api<Any>(`/lessons/${active.id}/play?enrollmentId=${eid}`)
-      .then(({ data: p }) => setPlay({ loading: false, embedUrl: p.embedUrl }))
-      .catch((e) => setPlay({ loading: false, error: e instanceof ApiError ? e.message : 'Playback unavailable.' }));
-  }, [active, eid]);
+  // Auto-complete once the player reports ≥90% watched (guarded: only once).
+  const autoComplete = (): void => {
+    if (!active || active.completed) return;
+    void api(`/lessons/${active.id}/progress`, { method: 'POST', body: JSON.stringify({ enrollmentId: eid, completed: true }) })
+      .then(() => { toast('success', 'Lesson auto-completed — 90% watched.'); setActive((a: Any) => (a ? { ...a, completed: true } : a)); return load(); })
+      .catch(() => undefined);
+  };
 
   // Documents live on private storage; fetch a short-lived signed URL on click.
   // Open a blank tab synchronously first so the async result isn't popup-blocked.
@@ -185,22 +184,9 @@ export default function ClassroomPage(): JSX.Element {
               </div>
               <div className="p-5">
                 {active.type === 'video' && (
-                  play.loading ? <div className="grid aspect-video place-items-center rounded-xl bg-neutral-100"><Spinner /></div>
-                  : play.error ? (
-                    <div className="rounded-xl bg-danger-50 p-4 text-body-sm text-danger-700">
-                      <p className="font-medium">This video can’t be played right now.</p>
-                      <p className="mt-1 text-danger-600">{play.error}</p>
-                    </div>
-                  )
-                  : play.embedUrl ? (
-                    <div>
-                      <div className="aspect-video overflow-hidden rounded-xl bg-black">
-                        <iframe src={play.embedUrl} className="h-full w-full" allow="autoplay; fullscreen" allowFullScreen title={active.title} />
-                      </div>
-                      <p className="mt-2 text-caption text-neutral-400">Trouble playing? The video may still be processing or temporarily unavailable — refresh, or contact support if it persists.</p>
-                    </div>
-                  )
-                  : <p className="rounded-xl bg-neutral-100 p-4 text-body-sm text-neutral-500">No video uploaded for this lesson yet.</p>
+                  active.locked
+                    ? <p className="rounded-xl bg-neutral-100 p-4 text-body-sm text-neutral-500">Complete the earlier lessons to unlock this video.</p>
+                    : <VideoPlayer key={active.id} lessonId={active.id} enrollmentId={eid} title={active.title} onComplete={autoComplete} />
                 )}
                 {active.type === 'quiz' && active.quizId && (
                   <div className="text-center">

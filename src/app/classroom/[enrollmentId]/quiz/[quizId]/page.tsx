@@ -95,13 +95,16 @@ export default function QuizPage(): JSX.Element {
                 <div key={q.id} className="card p-5">
                   <p className="font-medium text-neutral-800">{i + 1}. {q.questionText} {multi && <span className="text-caption text-neutral-400">(select all that apply)</span>}</p>
                   <div className="mt-3 space-y-2">
-                    {(q.options as string[]).map((opt) => {
-                      const selected = (answers[String(q.id)] ?? []).includes(opt);
+                    {(q.options as Any[]).map((rawOpt) => {
+                      // Options are {id,text} objects; tolerate plain strings too. Answers are graded by id.
+                      const optId = typeof rawOpt === 'string' ? rawOpt : String(rawOpt.id);
+                      const optText = typeof rawOpt === 'string' ? rawOpt : String(rawOpt.text);
+                      const selected = (answers[String(q.id)] ?? []).includes(optId);
                       return (
-                        <button key={opt} type="button" onClick={() => toggle(q.id, opt, multi)}
+                        <button key={optId} type="button" onClick={() => toggle(q.id, optId, multi)}
                           className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-body-sm transition ${selected ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-neutral-200 hover:bg-neutral-50'}`}>
                           <span className={`grid h-4 w-4 place-items-center rounded-${multi ? 'sm' : 'full'} border ${selected ? 'border-primary-600 bg-primary-600 text-white' : 'border-neutral-300'}`}>{selected ? '✓' : ''}</span>
-                          {opt}
+                          {optText}
                         </button>
                       );
                     })}
