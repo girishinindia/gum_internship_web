@@ -49,7 +49,12 @@ export default function ProjectsPage(): JSX.Element {
                   {t.latestSubmission ? <StatusBadge status={t.latestSubmission.status} /> : <span className="badge bg-neutral-100 text-neutral-600">Not started</span>}
                 </div>
                 {t.instructions && <p className="mt-2 whitespace-pre-line text-body-sm text-neutral-700">{t.instructions}</p>}
-                <p className="mt-2 text-caption text-neutral-500">Max score {t.maxScore}{t.deadline ? ` · due ${new Date(t.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''} · {t.resubmitsLeft} resubmits left</p>
+                <p className="mt-2 text-caption text-neutral-500">
+                  Max score {t.maxScore}
+                  {t.availableFrom ? ` · available ${new Date(t.availableFrom).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+                  {t.deadline ? ` · due ${new Date(t.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+                  {` · ${t.resubmitsLeft} resubmits left`}
+                </p>
 
                 {t.latestSubmission?.review && (
                   <div className="mt-3 rounded-xl bg-neutral-50 p-3 text-body-sm">

@@ -186,9 +186,21 @@ export default function ClassroomPage(): JSX.Element {
               <div className="p-5">
                 {active.type === 'video' && (
                   play.loading ? <div className="grid aspect-video place-items-center rounded-xl bg-neutral-100"><Spinner /></div>
-                  : play.error ? <p className="rounded-xl bg-danger-50 p-4 text-body-sm text-danger-700">{play.error}</p>
-                  : play.embedUrl ? <div className="aspect-video overflow-hidden rounded-xl bg-black"><iframe src={play.embedUrl} className="h-full w-full" allow="autoplay; fullscreen" allowFullScreen title={active.title} /></div>
-                  : <p className="text-neutral-500">No video uploaded for this lesson yet.</p>
+                  : play.error ? (
+                    <div className="rounded-xl bg-danger-50 p-4 text-body-sm text-danger-700">
+                      <p className="font-medium">This video can’t be played right now.</p>
+                      <p className="mt-1 text-danger-600">{play.error}</p>
+                    </div>
+                  )
+                  : play.embedUrl ? (
+                    <div>
+                      <div className="aspect-video overflow-hidden rounded-xl bg-black">
+                        <iframe src={play.embedUrl} className="h-full w-full" allow="autoplay; fullscreen" allowFullScreen title={active.title} />
+                      </div>
+                      <p className="mt-2 text-caption text-neutral-400">Trouble playing? The video may still be processing or temporarily unavailable — refresh, or contact support if it persists.</p>
+                    </div>
+                  )
+                  : <p className="rounded-xl bg-neutral-100 p-4 text-body-sm text-neutral-500">No video uploaded for this lesson yet.</p>
                 )}
                 {active.type === 'quiz' && active.quizId && (
                   <div className="text-center">

@@ -169,10 +169,20 @@ export default function SignupPage(): JSX.Element {
 function Field({ label, value, onChange, type = 'text', hint, ...rest }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; hint?: string;
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type'>): JSX.Element {
+  const [show, setShow] = useState(false);
+  const isPw = type === 'password';
   return (
     <label className="block">
       <span className="mb-1.5 block text-body-sm font-medium text-neutral-700">{label}</span>
-      <input className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} {...rest} />
+      <div className="relative">
+        <input className={`input ${isPw ? 'pr-16' : ''}`} type={isPw && show ? 'text' : type} value={value} onChange={(e) => onChange(e.target.value)} {...rest} />
+        {isPw && (
+          <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? 'Hide password' : 'Show password'}
+            className="absolute inset-y-0 right-0 px-3 text-body-sm font-medium text-primary-700">
+            {show ? 'Hide' : 'Show'}
+          </button>
+        )}
+      </div>
       {hint && <span className="mt-1 block text-caption text-neutral-400">{hint}</span>}
     </label>
   );

@@ -9,6 +9,7 @@ function LoginForm(): JSX.Element {
   const toast = useToast();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -50,7 +51,13 @@ function LoginForm(): JSX.Element {
           Password
           <a href="/forgot-password" className="text-body-sm font-medium text-primary-700 hover:underline">Forgot password?</a>
         </span>
-        <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+        <div className="relative">
+          <input className="input pr-16" type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+          <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? 'Hide password' : 'Show password'}
+            className="absolute inset-y-0 right-0 px-3 text-body-sm font-medium text-primary-700">
+            {showPw ? 'Hide' : 'Show'}
+          </button>
+        </div>
       </label>
       {error && <p className="rounded-md bg-danger-50 px-3 py-2 text-body-sm text-danger-700">{error}</p>}
       <button className="btn-primary w-full" disabled={busy}>{busy ? 'Logging in…' : 'Log in'}</button>
