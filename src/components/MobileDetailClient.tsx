@@ -53,7 +53,7 @@ export function MobileDetailClient({ slug, internshipId, pricingType, totalWithG
 
   return (
     <>
-      <div className="z-20 shrink-0 border-t border-neutral-200 bg-white p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 z-20 border-t border-neutral-200 bg-white p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
         {enrolledId ? (
           <div className="flex items-center gap-3">
             <div className="flex-1"><p className="font-medium text-success-700">✓ You’re already enrolled</p></div>

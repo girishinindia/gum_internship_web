@@ -136,13 +136,16 @@ export default function CheckoutPage(): JSX.Element {
         }),
       });
       const orderId = data.order.id as number;
-      const liveKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      const isDev = !liveKey || String(data.razorpayOrderId).startsWith('order_dev_');
+      // Follow the SERVER's mode. In dry-run there is no real gateway → simulate
+      // the confirm. Otherwise open the real Razorpay modal with the key the
+      // server returned (no reliance on a NEXT_PUBLIC build-time key).
+      const rzpKey = (data.razorpayKeyId as string | undefined) ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      const isDev = Boolean(data.devMode) || String(data.razorpayOrderId).startsWith('order_dev_');
 
-      if (!isDev && (await loadRazorpay())) {
+      if (!isDev && rzpKey && (await loadRazorpay())) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rzp = new (window as any).Razorpay({
-          key: data.razorpayKeyId ?? liveKey,
+          key: rzpKey,
           order_id: data.razorpayOrderId,
           amount: data.amountPaise,
           currency: data.currency ?? 'INR',

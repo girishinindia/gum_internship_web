@@ -12,8 +12,9 @@ const TABS: { href: string; label: string; icon: IconName; match: (p: string) =>
   { href: '/m/profile', label: 'Profile', icon: 'user', match: (p) => p.startsWith('/m/profile') },
 ];
 
-// Immersive/detail screens hide the bar so the content owns the viewport.
-const HIDE = /^\/m\/(?:internships|jobs|forum|bundles)\/[^/]+$|^\/m\/interview|^\/m\/classroom/;
+// A few fully-immersive screens still hide the bar; internship detail, classroom
+// and project tasks now KEEP it (their own action bar stacks above it).
+const HIDE = /^\/m\/(?:jobs|forum|bundles)\/[^/]+$|^\/m\/interview/;
 
 export function BottomNav(): JSX.Element | null {
   const pathname = usePathname() ?? '';

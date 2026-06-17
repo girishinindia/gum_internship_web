@@ -21,7 +21,7 @@ const RT = 'gum_rt';
 const MOBILE_UA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Silk/i;
 
 const PROTECTED = [
-  /^\/my/, /^\/classroom/, /^\/instructor/, /^\/m\/learn/, /^\/m\/profile/,
+  /^\/my/, /^\/classroom/, /^\/instructor(?:\/|$)/, /^\/m\/learn/, /^\/m\/profile/,
   /^\/m\/jobs/, /^\/m\/applications/, /^\/m\/mentorship/, /^\/m\/assessment/, /^\/m\/interview/,
   /^\/m\/forum/, /^\/m\/achievements/, /^\/m\/notifications/, /^\/m\/bundles/, /^\/m\/cpd/, /^\/m\/classroom/,
   /^\/checkout/, /^\/orders/, /^\/notifications/, /^\/ai(\/|$)/, /^\/employer/, /^\/orgs/,

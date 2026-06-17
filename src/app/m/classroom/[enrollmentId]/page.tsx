@@ -25,6 +25,7 @@ export default function MobileClassroom(): JSX.Element {
   const [play, setPlay] = useState<{ embedUrl?: string; loading: boolean; error?: string }>({ loading: false });
   const [live, setLive] = useState<Any[]>([]);
   const [marking, setMarking] = useState(false);
+  const [docBusy, setDocBusy] = useState(false);
   const [sheet, setSheet] = useState(false);
 
   const load = useCallback(async (): Promise<void> => {
@@ -48,6 +49,19 @@ export default function MobileClassroom(): JSX.Element {
       .then(({ data: p }) => setPlay({ loading: false, embedUrl: p.embedUrl }))
       .catch((e) => setPlay({ loading: false, error: e instanceof ApiError ? e.message : 'Playback unavailable.' }));
   }, [active, eid]);
+
+  const openDocument = async (): Promise<void> => {
+    if (!active) return;
+    setDocBusy(true);
+    const w = window.open('', '_blank');
+    try {
+      const { data: doc } = await api<Any>(`/lessons/${active.id}/document?enrollmentId=${eid}`);
+      if (w) w.location.href = doc.url; else window.location.href = doc.url;
+    } catch (e) {
+      if (w) w.close();
+      toast('danger', e instanceof ApiError ? e.message : 'Could not open the document.');
+    } finally { setDocBusy(false); }
+  };
 
   const markComplete = async (): Promise<void> => {
     if (!active) return; setMarking(true);
@@ -74,7 +88,7 @@ export default function MobileClassroom(): JSX.Element {
         actions={[{ icon: 'robot', label: 'AI buddy', href: `/classroom/${eid}/ai` }, { icon: 'dots', label: 'More', href: `/classroom/${eid}/certificate` }]} />
       <div className="h-1.5 bg-neutral-200"><div className="h-full bg-brand-gradient" style={{ width: `${pct}%` }} /></div>
 
-      <div className="space-y-4 p-4 pb-28">
+      <div className="space-y-4 p-4 pb-4">
         {myLive.length > 0 && (
           <div className="rounded-2xl border border-danger-200 bg-danger-50/50 p-3">
             <p className="text-body-sm font-semibold text-danger-700">● Live now / soon</p>
@@ -99,7 +113,7 @@ export default function MobileClassroom(): JSX.Element {
               )}
               {active.type === 'quiz' && active.quizId && <Link href={`/classroom/${eid}/quiz/${active.quizId}`} className="block rounded-2xl bg-primary-600 py-3 text-center font-medium text-white">Start quiz</Link>}
               {active.type === 'live' && <p className="text-neutral-600">Join live sessions from the banner above.</p>}
-              {(active.type === 'document' || active.type === 'text') && (active.documentUrl ? <a href={active.documentUrl} target="_blank" rel="noopener" className="block rounded-2xl bg-primary-600 py-3 text-center font-medium text-white">Open document</a> : <p className="text-neutral-500">Reading material appears here.</p>)}
+              {(active.type === 'document' || active.type === 'text') && (active.documentUrl ? <button onClick={openDocument} disabled={docBusy} className="block w-full rounded-2xl bg-primary-600 py-3 text-center font-medium text-white disabled:opacity-60">{docBusy ? 'Opening…' : 'Open document'}</button> : <p className="text-neutral-500">Reading material appears here.</p>)}
             </div>
           </div>
         )}
@@ -112,8 +126,8 @@ export default function MobileClassroom(): JSX.Element {
         </div>
       </div>
 
-      {/* Sticky action bar */}
-      <div className="fixed inset-x-0 bottom-0 z-20 flex gap-2 border-t border-neutral-200 bg-white/95 p-3 backdrop-blur-xl" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
+      {/* Sticky action bar — sits above the global bottom nav */}
+      <div className="sticky bottom-0 z-20 flex gap-2 border-t border-neutral-200 bg-white/95 p-3 backdrop-blur-xl" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
         <button onClick={() => setSheet(true)} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-neutral-200 font-medium text-neutral-700">
           <Icon name="menu" size={20} /> Lessons
         </button>

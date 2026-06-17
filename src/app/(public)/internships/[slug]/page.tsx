@@ -197,14 +197,14 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
             </div>
           </section>
 
-          {(d.faqs as Detail[]).length > 0 && (
+          {Array.isArray(d.faqs) && (d.faqs as Detail[]).length > 0 && (
             <section>
               <h2 className="text-h2">FAQs</h2>
               <div className="mt-4 space-y-3">
-                {(d.faqs as { q: string; a: string }[]).map((f) => (
-                  <details key={f.q} className="card p-4">
-                    <summary className="cursor-pointer list-none font-medium">{f.q}</summary>
-                    <p className="mt-2 text-neutral-700">{f.a}</p>
+                {(d.faqs as { question: string; answer: string }[]).map((f, i) => (
+                  <details key={i} className="card p-4">
+                    <summary className="cursor-pointer list-none font-medium">{f.question}</summary>
+                    <p className="mt-2 text-neutral-700">{f.answer}</p>
                   </details>
                 ))}
               </div>
@@ -213,12 +213,12 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
 
           <section>
             <h2 className="text-h2">Your mentor</h2>
-            <div className="card mt-4 flex gap-4 p-5">
+            <Link href={`/instructors/${d.instructor.id}`} className="card card-hover mt-4 flex gap-4 p-5">
               <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary-50 font-heading text-h3 text-primary-700">
                 {String(d.instructor.name).slice(0, 1)}
               </div>
               <div>
-                <p className="font-heading text-h3">{d.instructor.name}</p>
+                <p className="font-heading text-h3">{d.instructor.name} <span className="text-body-sm font-normal text-primary-700">View profile →</span></p>
                 <p className="mt-1 text-body-sm text-neutral-700">{d.instructor.bio}</p>
                 <p className="mt-2 flex flex-wrap gap-1.5">
                   {(d.instructor.expertise as string[]).map((e) => (
@@ -226,7 +226,7 @@ export default async function InternshipDetailPage({ params }: { params: { slug:
                   ))}
                 </p>
               </div>
-            </div>
+            </Link>
           </section>
         </div>
         <div className="hidden md:block" />

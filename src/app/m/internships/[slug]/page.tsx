@@ -21,9 +21,9 @@ export default async function MobileDetail({ params }: { params: { slug: string 
   const d = await get(params.slug);
   if (!d) notFound();
   return (
-    <div className="app-screen">
+    <>
       {/* Collapsing-style hero (image + overlaid title) */}
-      <div className="app-body">
+      <div>
         <div className="relative">
           <div className="aspect-[16/10] bg-neutral-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -70,6 +70,22 @@ export default async function MobileDetail({ params }: { params: { slug: string 
               ))}
             </div>
           </section>
+
+          {Array.isArray(d.faqs) && (d.faqs as Detail[]).length > 0 && (
+            <section>
+              <h2 className="mb-2 font-heading text-h3">FAQs</h2>
+              <div className="divide-y divide-neutral-100 overflow-hidden rounded-xl border border-neutral-200">
+                {(d.faqs as { question: string; answer: string }[]).map((f, i) => (
+                  <details key={i} className="group bg-white">
+                    <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-body-sm font-medium">
+                      {f.question}<span className="text-neutral-400 transition group-open:rotate-90">›</span>
+                    </summary>
+                    <p className="bg-neutral-50 px-4 py-3 text-body-sm text-neutral-700">{f.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
 
@@ -82,6 +98,6 @@ export default async function MobileDetail({ params }: { params: { slug: string 
         gstRate={d.gstRate}
         batches={d.upcomingBatches}
       />
-    </div>
+    </>
   );
 }
