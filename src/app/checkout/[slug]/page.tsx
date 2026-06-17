@@ -100,6 +100,27 @@ export default function CheckoutPage(): JSX.Element {
     toast('info', 'Still waiting for confirmation. You can check Orders shortly.');
   };
 
+  // Confirm the payment synchronously via the Checkout handler signature — no
+  // dependence on the webhook, so the success page appears at once. Falls back
+  // to polling (the webhook backup) only if the verify call itself hiccups.
+  const confirmAndGo = async (orderId: number, paymentId: string, signature: string): Promise<void> => {
+    setPolling(true);
+    try {
+      const { data } = await api<Any>(`/orders/${orderId}/confirm`, {
+        method: 'POST',
+        body: JSON.stringify({ razorpayPaymentId: paymentId, razorpaySignature: signature }),
+      });
+      if (data.status === 'paid') {
+        toast('success', 'Payment confirmed — you are enrolled! 🎉');
+        router.push('/my');
+        return;
+      }
+      await pollPaid(orderId);
+    } catch {
+      await pollPaid(orderId);
+    }
+  };
+
   const pay = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!d) return;
@@ -129,14 +150,16 @@ export default function CheckoutPage(): JSX.Element {
           description: d.title,
           prefill: data.prefill,
           theme: { color: '#0284c7' },
-          handler: () => { void pollPaid(orderId); },
+          handler: (resp: Any) => {
+            void confirmAndGo(orderId, String(resp?.razorpay_payment_id ?? ''), String(resp?.razorpay_signature ?? ''));
+          },
           modal: { ondismiss: () => { setBusy(false); toast('info', 'Checkout closed. Your order is saved under Orders.'); } },
         });
         rzp.open();
       } else {
-        // Dev/dry-run: order created; payment is simulated server-side via webhook.
-        toast('info', 'Dev mode: order created. Waiting for simulated payment…');
-        void pollPaid(orderId);
+        // Dev/dry-run: no real modal — confirm with the dev token so enrolment completes.
+        toast('info', 'Dev mode: confirming simulated payment…');
+        void confirmAndGo(orderId, `pay_dev_${orderId}`, 'dev_ok');
       }
     } catch (e2) {
       setErr(e2 instanceof ApiError ? e2.message : 'Could not start checkout. Please try again.');

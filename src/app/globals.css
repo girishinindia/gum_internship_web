@@ -55,7 +55,11 @@
 
 /* ---- Mobile-device layout (served to phones/tablets via UA redirect to /m) ---- */
 @layer components {
-  .app-screen { @apply flex min-h-[100dvh] flex-col bg-neutral-50; }
+  /* Fixed-height shell: the viewport is locked to the device, .app-body is the
+     ONLY scroller, and the bottom nav (a flex sibling) stays pinned in view.
+     min-h here lets the shell grow past the screen, which both kills the inner
+     scroll and pushes the nav below the fold — hence h + overflow-hidden. */
+  .app-screen { @apply flex h-[100dvh] flex-col overflow-hidden bg-neutral-50; }
   .app-bar { @apply sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 glass px-4; }
   .app-body { @apply flex-1 overflow-y-auto overscroll-contain; -webkit-overflow-scrolling: touch; }
   .list-row { @apply flex w-full items-center gap-3 bg-white px-4 py-3.5 text-left active:bg-neutral-100; }
