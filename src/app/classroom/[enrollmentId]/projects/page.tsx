@@ -10,6 +10,12 @@ import { useToast } from '@/components/ui/Toast';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Any = Record<string, any>;
 const URL_TYPES: Record<string, string> = { github_url: 'GitHub repo URL', live_url: 'Live/demo URL', video_url: 'Video URL' };
+const URL_PLACEHOLDER: Record<string, string> = {
+  github_url: 'https://github.com/your-name/your-repo',
+  live_url: 'https://your-app.example.com',
+  video_url: 'https://youtube.com/watch?v=…',
+};
+const GITHUB_RE = /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(\/.*)?$/i;
 
 export default function ProjectsPage(): JSX.Element {
   const { enrollmentId } = useParams<{ enrollmentId: string }>();
@@ -87,11 +93,17 @@ export default function ProjectsPage(): JSX.Element {
     const [busy, setBusy] = useState(false);
 
     const submit = async (e: React.FormEvent): Promise<void> => {
-      e.preventDefault(); setBusy(true);
+      e.preventDefault();
+      const trimmed = url.trim();
+      if (type === 'github_url' && !GITHUB_RE.test(trimmed)) {
+        toast('danger', 'Enter a valid GitHub repository URL, e.g. https://github.com/your-name/your-repo');
+        return;
+      }
+      setBusy(true);
       try {
         await api(`/tasks/${task.taskId}/submissions`, {
           method: 'POST',
-          body: JSON.stringify({ enrollmentId: eid, submissionType: type, urlValue: url, notes: notes || undefined }),
+          body: JSON.stringify({ enrollmentId: eid, submissionType: type, urlValue: trimmed, notes: notes || undefined }),
         });
         toast('success', 'Submitted for review!');
         onDone();
@@ -110,7 +122,8 @@ export default function ProjectsPage(): JSX.Element {
             {urlTypes.map((x) => <option key={x} value={x}>{URL_TYPES[x] ?? x}</option>)}
           </Select>
         )}
-        <Field label={URL_TYPES[type] ?? 'URL'} type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" required />
+        <Field label={URL_TYPES[type] ?? 'URL'} type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder={URL_PLACEHOLDER[type] ?? 'https://…'} required />
+        {type === 'github_url' && <p className="text-caption text-neutral-500">Must be a public GitHub repository URL (github.com/owner/repo).</p>}
         <Textarea label="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} />
         <div className="flex gap-2">
           <Button type="submit" size="sm" loading={busy}>Submit</Button>
