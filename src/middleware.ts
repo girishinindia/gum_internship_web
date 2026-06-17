@@ -26,7 +26,7 @@ const PROTECTED = [
   /^\/m\/forum/, /^\/m\/achievements/, /^\/m\/notifications/, /^\/m\/bundles/, /^\/m\/cpd/, /^\/m\/classroom/,
   /^\/checkout/, /^\/orders/, /^\/notifications/, /^\/ai(\/|$)/, /^\/employer/, /^\/orgs/,
   /^\/achievements/, /^\/forum/, /^\/interview/, /^\/mentorship/, /^\/assessment/,
-  /^\/jobs/, /^\/applications/, /^\/bundles/, /^\/cpd/,
+  /^\/jobs/, /^\/applications/, /^\/bundles/, /^\/cpd/, /^\/become-instructor/,
 ];
 
 async function refresh(rt: string): Promise<{ at: string; rt: string; maxAge: number } | null> {
@@ -58,7 +58,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
 
   // 1) Device routing (skip the shared /login and /verify pages).
   const onMobilePath = isMobilePath(pathname);
-  const shared = pathname === '/login' || pathname.startsWith('/verify') || pathname.startsWith('/pages');
+  const shared = pathname === '/login' || pathname === '/forgot-password' || pathname.startsWith('/verify') || pathname.startsWith('/pages');
   if (!shared) {
     if (isMobile && !onMobilePath) {
       const to = toMobilePath(pathname);

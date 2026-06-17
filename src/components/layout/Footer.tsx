@@ -14,7 +14,7 @@ export function Footer(): JSX.Element {
             </div>
             <p className="mt-3 max-w-xs text-body-sm text-neutral-500">Learn by doing — real projects, mentor reviews, verifiable certificates.</p>
           </div>
-          <FooterCol title="Learn" links={[['Explore internships', '/internships'], ['Verify a certificate', '/verify']]} />
+          <FooterCol title="Learn" links={[['Explore internships', '/internships'], ['Verify a certificate', '/verify'], ['Become an instructor', '/become-instructor']]} />
           <FooterCol title="Company" links={[['About', '/pages/about'], ['Contact', '/pages/contact']]} />
           <FooterCol title="Legal" links={[['Refund policy', '/pages/refund-policy'], ['Terms', '/pages/terms'], ['Privacy', '/pages/privacy']]} />
         </div>

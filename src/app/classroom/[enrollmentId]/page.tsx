@@ -24,6 +24,7 @@ export default function ClassroomPage(): JSX.Element {
   const [play, setPlay] = useState<{ embedUrl?: string; loading: boolean; error?: string }>({ loading: false });
   const [live, setLive] = useState<Any[]>([]);
   const [marking, setMarking] = useState(false);
+  const [docBusy, setDocBusy] = useState(false);
 
   const load = useCallback(async (): Promise<void> => {
     try {
@@ -56,6 +57,21 @@ export default function ClassroomPage(): JSX.Element {
       .then(({ data: p }) => setPlay({ loading: false, embedUrl: p.embedUrl }))
       .catch((e) => setPlay({ loading: false, error: e instanceof ApiError ? e.message : 'Playback unavailable.' }));
   }, [active, eid]);
+
+  // Documents live on private storage; fetch a short-lived signed URL on click.
+  // Open a blank tab synchronously first so the async result isn't popup-blocked.
+  const openDocument = async (): Promise<void> => {
+    if (!active) return;
+    setDocBusy(true);
+    const w = window.open('', '_blank');
+    try {
+      const { data: doc } = await api<Any>(`/lessons/${active.id}/document?enrollmentId=${eid}`);
+      if (w) w.location.href = doc.url; else window.location.href = doc.url;
+    } catch (e) {
+      if (w) w.close();
+      toast('danger', e instanceof ApiError ? e.message : 'Could not open the document.');
+    } finally { setDocBusy(false); }
+  };
 
   const markComplete = async (): Promise<void> => {
     if (!active) return;
@@ -182,8 +198,9 @@ export default function ClassroomPage(): JSX.Element {
                 )}
                 {active.type === 'live' && <p className="text-neutral-600">This is a live session — join from the Live panel above when it starts.</p>}
                 {(active.type === 'document' || active.type === 'text') && (
-                  active.documentUrl ? <a href={active.documentUrl} target="_blank" rel="noopener" className="btn-primary inline-flex">Open document</a>
-                  : <p className="text-neutral-500">Reading material will appear here.</p>
+                  active.documentUrl
+                    ? <Button onClick={openDocument} loading={docBusy} className="inline-flex">Open document</Button>
+                    : <p className="text-neutral-500">Reading material will appear here.</p>
                 )}
                 {(data.languages as string[]).filter((l) => l !== 'english').length > 0 && (
                   <LessonTranslation eid={eid} lessonId={active.id} languages={(data.languages as string[]).filter((l) => l !== 'english')} />

@@ -46,7 +46,10 @@ function LoginForm(): JSX.Element {
         <input className="input" value={identifier} onChange={(e) => setIdentifier(e.target.value)} autoComplete="username" required />
       </label>
       <label className="block">
-        <span className="mb-1 block text-body-sm font-medium text-neutral-800">Password</span>
+        <span className="mb-1 flex items-center justify-between text-body-sm font-medium text-neutral-800">
+          Password
+          <a href="/forgot-password" className="text-body-sm font-medium text-primary-700 hover:underline">Forgot password?</a>
+        </span>
         <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
       </label>
       {error && <p className="rounded-md bg-danger-50 px-3 py-2 text-body-sm text-danger-700">{error}</p>}

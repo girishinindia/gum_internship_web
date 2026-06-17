@@ -195,9 +195,7 @@ export default function CheckoutPage(): JSX.Element {
         <aside className="card h-fit space-y-3 p-6">
           <p className="font-heading text-h3">{d.title}</p>
           {batchId && (
-            <p className="text-body-sm text-neutral-500">
-              {(d.upcomingBatches as Any[] | undefined)?.find((b) => Number(b.id) === batchId)?.name ?? `Batch #${batchId}`}
-            </p>
+            <p className="text-body-sm text-neutral-500">{batchLabel(d, batchId)}</p>
           )}
           <div className="space-y-1.5 border-t border-neutral-100 pt-3 text-body-sm">
             <Row label="Price" value={inr(subtotal)} />
@@ -216,6 +214,18 @@ export default function CheckoutPage(): JSX.Element {
       </div>
     </Shell>
   );
+}
+
+/** Friendly batch label: real name → start-date → generic. Never the raw id. */
+function batchLabel(d: Any, batchId: number): string {
+  const pool: Any[] = [...((d.batches as Any[] | undefined) ?? []), ...((d.upcomingBatches as Any[] | undefined) ?? [])];
+  const b = pool.find((x) => Number(x.id) === batchId);
+  if (b?.name && String(b.name).trim()) return String(b.name).trim();
+  if (b?.startDate) {
+    const dt = new Date(b.startDate);
+    if (!Number.isNaN(dt.getTime())) return `Batch starting ${dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  }
+  return 'Selected batch';
 }
 
 function Row({ label, value, good }: { label: string; value: string; good?: boolean }): JSX.Element {

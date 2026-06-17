@@ -77,7 +77,7 @@ export function EnrollCTA({ internshipId, slug, pricingType, paceType, batches, 
       {isCohort && open.length > 0 && !compact && (
         <select className="input" value={batchId} onChange={(e) => setBatchId(Number(e.target.value))}>
           {open.map((b) => (
-            <option key={b.id} value={b.id}>{b.name} · starts {b.startDate} · {b.seatsLeft} seats</option>
+            <option key={b.id} value={b.id}>{(b.name && b.name.trim()) || 'Batch'} · starts {b.startDate} · {b.seatsLeft} seats</option>
           ))}
         </select>
       )}
